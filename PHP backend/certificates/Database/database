@@ -1,0 +1,160 @@
+CREATE TABLE students (
+    prnno BIGINT NOT NULL UNIQUE,           -- PRN Number (Unique identifier )
+    studname VARCHAR(100) NOT NULL,         -- Student Name
+    studdob DATE NOT NULL,                  -- Student Date of Birth
+    address TEXT NOT NULL,                  -- Address
+    pincode CHAR(6) NOT NULL,               -- Pincode (allow only 6-digit code)
+    email VARCHAR(100) NOT NULL UNIQUE,     -- Email 
+    phone_no CHAR(10) NOT NULL UNIQUE,      -- Phone Number (only 10-digit)
+    gender ENUM('Male', 'Female', 'Other') NOT NULL, -- Gender
+    branch VARCHAR(50) NOT NULL,            -- Branch 
+    division CHAR(1) NOT NULL,              -- Division 
+    year INT NOT NULL,                      -- Year of Study 
+    parentsphone CHAR(10) NOT NULL,         -- Parent's Phone Number (10-digit)
+    batch VARCHAR(20) NOT NULL,             -- Batch
+    batchYear INT NOT NULL,                 -- Batch Year
+    rollno INT NOT NULL UNIQUE,             -- Roll Number (Unique)
+    PRIMARY KEY (prnno)                     -- Set PRN Number as Primary Key
+);
+
+
+--insertion operation
+INSERT INTO students (
+    prnno, studname, studdob, address, pincode, email, phone_no, gender, branch, division, year, parentsphone, batch, batchYear, rollno
+) 
+VALUES (
+    20221149, 'Vishal shriram Ghuge', '2004-04-15', 'jintur, Parbhani', '431510', 'vishal@gmail.com', '7620290331', 'Male', 'Computer Science', 'A', 3, '0000000000', 'Morning', 2025, 149
+);
+
+
+-- view for bonafid-certificate
+CREATE VIEW student_info AS
+SELECT 
+    prnno, 
+    studname, 
+    studdob, 
+    branch,
+    YEAR(CURDATE()) AS currentYear,  -- Calculate the current year
+    NULL AS reason,                  -- Placeholder for reason (can be updated later)
+    NULL AS status                   -- Placeholder for status (can be updated later)
+FROM students;
+
+
+-- table
+CREATE TABLE bonafide (
+    prnno BIGINT NOT NULL,                 -- PRN Number (Unique identifier)             -- Current Year (calculated from the system)
+    reason TEXT,                           -- Reason for the bonafide request (Optional)
+    status ENUM('Pending', 'Approved','Rejected','Completed') DEFAULT 'Pending', -- Status (Default: Pending)
+    rejected VARCHAR(150) DEFAULT 'NO',
+    PRIMARY KEY (prnno)                    -- Set PRN Number as Primary Key
+);
+
+
+CREATE TABLE leaving_certificate (
+    prnno INT PRIMARY KEY,         -- PRN number as the primary key
+    section TINYINT DEFAULT 1,               -- Section as a 2-digit number
+    reject TEXT DEFAULT 'NO'  ,                 -- Remark as a text field
+    reason VARCHAR(200),
+    remark VARCHAR(20),
+    status ENUM('Pending' , 'Approved' , 'Rejected' , 'Completed') DEFAULT "Pending"
+);
+
+CREATE TABLE distributed_bonafides(
+    prnno BIGINT NOT NULL,                 -- PRN Number (Unique identifier)             -- Current Year (calculated from the system)
+    reason TEXT,                           -- Reason for the bonafide request (Optional)
+    status ENUM('Pending', 'Approved','Rejected','Completed') DEFAULT 'Pending', -- Status (Default: Pending)
+    rejected VARCHAR(150) DEFAULT 'NO',
+    distributed_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (prnno) 
+)
+
+
+
+
+CREATE TABLE first_year (
+    prnno BIGINT NOT NULL UNIQUE,           -- PRN Number (Unique identifier )
+    studname VARCHAR(100) NOT NULL,         -- Student Name
+    studdob DATE NOT NULL,                  -- Student Date of Birth
+    address TEXT NOT NULL,                  -- Address
+    pincode CHAR(6) NOT NULL,               -- Pincode (allow only 6-digit code)
+    email VARCHAR(100) NOT NULL UNIQUE,     -- Email 
+    phone_no CHAR(10) NOT NULL UNIQUE,      -- Phone Number (only 10-digit)
+    gender ENUM('Male', 'Female', 'Other') NOT NULL, -- Gender
+    branch VARCHAR(50) NOT NULL,            -- Branch 
+    division CHAR(1) NOT NULL,              -- Division 
+    year INT NOT NULL,                      -- Year of Study 
+    parentsphone CHAR(10) NOT NULL,         -- Parent's Phone Number (10-digit)
+    batch VARCHAR(20) NOT NULL,             -- Batch
+    batchYear INT NOT NULL,                 -- Batch Year
+    rollno INT NOT NULL UNIQUE,             -- Roll Number (Unique)                  
+    total_fees INT,
+    paid_fees INT,
+    schlorship_form_status TINYINT(1),      -- Changed to TINYINT for boolean-like state
+    first_installment INT,
+    second_installment INT,
+    exam_form_status TINYINT(1),            -- Changed to TINYINT for boolean-like state
+    academic_status TINYINT(1),             -- Fixed typo and changed to TINYINT
+    SGPA DECIMAL(4,2),
+    CGPA DECIMAL(4,2),
+    PRIMARY KEY (prnno)                 
+);
+
+
+DELIMITER $$
+
+CREATE TRIGGER before_second_year_update
+BEFORE UPDATE ON Second_year
+FOR EACH ROW
+BEGIN
+    INSERT INTO Third_year (
+        prnno, studname, studdob, address, pincode, email, phone_no, gender, branch, 
+        division, year, parentsphone, batch, batchYear, rollno, total_fees, 
+        paid_fees, schlorship_form_status, first_installment, second_installment, 
+        exam_form_status, academic_status, SGPA, CGPA
+    )
+    VALUES (
+        OLD.prnno, OLD.studname, OLD.studdob, OLD.address, OLD.pincode, OLD.email, OLD.phone_no, 
+        OLD.gender, OLD.branch, OLD.division, OLD.year, OLD.parentsphone, OLD.batch, 
+        OLD.batchYear, OLD.rollno, OLD.total_fees, OLD.paid_fees, OLD.schlorship_form_status, 
+        OLD.first_installment, OLD.second_installment, OLD.exam_form_status, 
+        OLD.academic_status, OLD.SGPA, OLD.CGPA
+    );
+END$$
+
+DELIMITER ;
+
+
+INSERT INTO second_year (
+    prnno, studname, studdob, address, pincode, email, phone_no, gender, branch, 
+    division, year, parentsphone, batch, batchYear, rollno, total_fees, paid_fees, 
+    schlorship_form_status, first_installment, second_installment, exam_form_status, 
+    academic_status, SGPA, CGPA
+) 
+VALUES (
+    202213149, 'vishal ghuge', '2004-04-15', 'parbhani', '123456', 
+    'v@gmail.com', '9876543210', 'Male', 'Computer ', 'A', 1, 
+    '9123456789', 'morning ', 2025, 101, 81000, 8000, 1, 1, 1, 1, 'Completed', 8.50, 8.20
+);
+
+INSERT INTO third_year (
+    prnno, studname, studdob, address, pincode, email, phone_no, gender, branch, 
+    division, year, parentsphone, batch, batchYear, rollno, total_fees, paid_fees, 
+    schlorship_form_status, first_installment, second_installment, exam_form_status, 
+    academic_status, SGPA, CGPA
+) 
+VALUES (
+    202213144, 'Priyanka Gaikwad', '2004-06-02', 'Pune', '123456', 
+    'p@gmail.com', '9876543810', 'Female', 'Computer ', 'A', 1, 
+    '9123456789', 'morning ', 2023, 10, 81000, 44736, 1, 1, 1, 1, 'Completed', 9.00, 9.20
+);
+
+CREATE TABLE previous_acadmic_details(name varchar(50), mother_name varchar(50), relegion varchar(20), 
+cast varchar(50), place_of_birth varchar(20), nationality varchar(20), DOB date, DOB_in_words varchar(50), 
+previous_institute varchar(100), DOA date, standerd varchar(20), prnno INT PRIMARY KEY);
+
+INSERT INTO `previous_acadmic_details` (`name`, `mother_name`, `relegion`, `cast`, `place_of_birth`,
+ `nationality`, `DOB`, `DOB_in_words`, `previous_institute`, `DOA`, `standerd`, `prnno`) 
+ VALUES ('Vishal Ghuge', 'Sangita', 'Hindu', 'Vanjari (NTD)', 'Sawali(Bk)', 'Indian', '2004-04-15', '15 April 2004', 'Shri Shivaji College, Parbhani', '2022-11-12', 
+  NULL, 'TE ', '202213149');
+
+  
